@@ -60,9 +60,20 @@ const VirtualizedList = ({ items, title, selectedValue, onSelect, isMultiSelect 
   isMultiSelect?: boolean;
 }) => {
   const parentRef = useRef<HTMLDivElement>(null);
+  const [search, setSearch] = useState('');
+
+  const filteredItems = items.filter(item => {
+    // console.log(`Searching for: "${search}" in "${item.label}" (value: ${item.value})`);
+    const labelMatch = item.label.includes(search);
+    const valueMatch = item.value.includes(search);
+    // if (labelMatch || valueMatch) {
+    //   console.log(`Found match: ${item.label}`);
+    // }
+    return labelMatch || valueMatch;
+  });
 
   const virtualizer = useVirtualizer({
-    count: items.length,
+    count: filteredItems.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 32,
     overscan: 10,
@@ -70,13 +81,17 @@ const VirtualizedList = ({ items, title, selectedValue, onSelect, isMultiSelect 
 
   return (
     <Command>
-      <CommandInput placeholder={`搜索${title}`} />
+      <CommandInput
+        placeholder={`搜索${title}`}
+        value={search}
+        onValueChange={setSearch}
+      />
       <CommandList ref={parentRef} style={{ height: '224px', overflow: 'auto' }}>
         <CommandEmpty>{`未找到${title}`}</CommandEmpty>
         {virtualizer.getTotalSize() > 0 && (
           <CommandGroup style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
             {virtualizer.getVirtualItems().map((virtualItem) => {
-              const item = items[virtualItem.index];
+              const item = filteredItems[virtualItem.index];
               const isSelected = isMultiSelect
                 ? selectedValues?.includes(item.value)
                 : selectedValue === item.value;
@@ -84,7 +99,10 @@ const VirtualizedList = ({ items, title, selectedValue, onSelect, isMultiSelect 
               return (
                 <CommandItem
                   key={virtualItem.key}
-                  onSelect={() => onSelect(item.value)}
+                  value={item.label}
+                  onSelect={() => {
+                    onSelect(item.value);
+                  }}
                   style={{
                     position: 'absolute',
                     top: 0,

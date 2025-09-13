@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertTriangle } from "lucide-react"
 import { Button } from '@/components/ui/button';
 import { Report, Pagination } from '@/lib/types';
 import { ReportFilters } from '@/components/ReportFilters';
@@ -72,12 +74,20 @@ function ReportBrowser() {
           </p>
         ) : (
           pagination && pagination.totalItems > 0 ? (
-            <p>共找到 {pagination.totalItems} 份研报</p>
+            <p>共找到 <span className='font-bold'>{pagination.totalItems}</span> 份研报</p>
           ) : null
         )}
       </div>
 
-      {error && <p className="text-red-500">发生错误: {error}</p>}
+      {error && (
+        <Alert variant="destructive" className="my-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>发生错误</AlertTitle>
+          <AlertDescription>
+            {error}
+          </AlertDescription>
+        </Alert>
+      )}
 
       {loading ? (
         <div>

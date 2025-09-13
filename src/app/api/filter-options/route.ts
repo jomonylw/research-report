@@ -1,33 +1,28 @@
 import { NextResponse } from 'next/server';
-import db from '@/lib/db';
 
-interface FilterOption {
-  id: number;
-  type: 'I' | 'S';
-  value: string;
-  label: string;
-}
-
+export const runtime = 'edge';
 export async function GET() {
+  // Ensure NEXT_PUBLIC_APP_URL is set in your environment variables
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
   try {
-    const { rows } = await db.execute('SELECT id, type, value, label FROM filter_options');
+    // We fetch from our own internal API route.
+    // This allows us to leverage Next.js's fetch caching mechanism.
+    const response = await fetch(`${appUrl}/api/internal/filter-options`, {
+      next: {
+        revalidate: 86400, // Cache for one day (24 * 60 * 60 seconds)
+        tags: ['filter-options'], // Tag for on-demand revalidation
+      },
+    });
 
-    const options = rows as unknown as FilterOption[];
+    if (!response.ok) {
+      throw new Error(`Failed to fetch internal filter options: ${response.statusText}`);
+    }
 
-    // Sort using localeCompare for proper Chinese character sorting
-    options.sort((a, b) => a.label.localeCompare(b.label, 'zh-CN'));
-
-    const stocks = options
-      .filter(option => option.type === 'S')
-      .map(option => ({ value: option.value, label: `${option.label} (${option.value})` }));
-
-    const institutions = options
-      .filter(option => option.type === 'I')
-      .map(option => ({ value: option.value, label: option.label }));
-
-    return NextResponse.json({ stocks, institutions });
+    const data = await response.json();
+    return NextResponse.json(data);
   } catch (error) {
-    console.error('Failed to fetch filter options:', error);
+    console.error('Failed to fetch cached filter options:', error);
     return NextResponse.json({ error: 'Failed to fetch filter options' }, { status: 500 });
   }
 }
