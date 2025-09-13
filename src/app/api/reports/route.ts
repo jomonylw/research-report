@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export const runtime = 'edge'
+// export const runtime = 'edge'
 export async function GET(request: NextRequest) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
   const url = new URL(request.url)
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       `${appUrl}/api/internal/reports${url.search}`,
       {
         next: {
-          revalidate: 600, // Cache for 10 minutes
+          revalidate: 60 * 60, // Cache for 10 minutes
           tags: ['reports'], // Tag for on-demand revalidation
         },
       },
