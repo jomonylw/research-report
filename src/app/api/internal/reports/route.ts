@@ -112,7 +112,13 @@ async function fetchReportsFromDb(request: NextRequest) {
   const validSortColumns = ['publishDate', 'title', 'orgSName']
   const orderBy = validSortColumns.includes(sortBy) ? sortBy : 'publishDate'
 
-  const dataQuery = `SELECT * FROM reports ${whereSql} ORDER BY ${orderBy} ${order}, infoCode ${order} LIMIT ? OFFSET ?`
+  const selectFields = `
+    infoCode, title, publishDate, reportType, stockCode, stockName,
+    industryCode, industryName, indvInduCode, indvInduName,
+    orgCode, orgSName, author, "column", market, attachPages,
+    attachSize, pdfLink, content
+  `
+  const dataQuery = `SELECT ${selectFields} FROM reports ${whereSql} ORDER BY ${orderBy} ${order}, infoCode ${order} LIMIT ? OFFSET ?`
   const dataParams = [...params, pageSize, offset]
   const reportsResult = await db.execute({ sql: dataQuery, args: dataParams })
   const reports = resultSetToObjects(reportsResult)
