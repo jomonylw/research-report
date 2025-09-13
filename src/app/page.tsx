@@ -3,7 +3,6 @@
 import { useEffect, useState, Suspense } from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertTriangle } from "lucide-react"
-import { Button } from '@/components/ui/button';
 import { Report, Pagination } from '@/lib/types';
 import { ReportFilters } from '@/components/ReportFilters';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -41,7 +40,7 @@ function ReportBrowser() {
     fetchReports();
   }, [searchParams]);
 
-  const handleFilterChange = (query: string) => {
+  const handleFilterChange = () => {
      // This function is now primarily to re-trigger fetches when filters change.
      // The ReportFilters component handles the URL updates.
   };

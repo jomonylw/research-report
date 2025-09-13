@@ -125,6 +125,7 @@ export const ReportCard = ({ report, onTagClick }: ReportCardProps) => {
       >
         {isExpanded && report.stockCode && (
           <div className="my-4 flex justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt={`K图 ${report.stockCode}`}
               className="rounded-sm shadow-sm border border-gray-200 dark:border-gray-700"

@@ -1,11 +1,11 @@
 {
-  "name": "Report Mining",
-  "short_name": "Report Mining",
-  "description": "A website for mining reports.",
+  "name": "研报中心",
+  "short_name": "研报中心",
+  "description": "研报中心提供最新、最全的行业研究报告和个股分析报告。通过我们的高级搜索和筛选功能，您可以轻松获取专业的金融数据、市场趋势和投资见解，助力您的决策。",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#0A192F",
+  "theme_color": "#FFFFFF",
   "icons": [
     {
       "src": "/icon-192x192.png",

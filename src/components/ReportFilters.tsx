@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useDebouncedCallback } from 'use-debounce';
 import { useVirtualizer } from '@tanstack/react-virtual';
