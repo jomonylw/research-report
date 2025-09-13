@@ -127,7 +127,25 @@ function ReportBrowser() {
 
 export default function ReportBrowserPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className='container mx-auto p-4 max-w-6xl'>
+          <Header />
+          <div className='my-4 pl-2 text-sm text-muted-foreground'>
+            <p className='flex items-center'>
+              共找到&nbsp;
+              <span className='inline-block bg-gray-200 dark:bg-gray-700 rounded-sm animate-pulse h-5 w-8'></span>
+              &nbsp;份研报
+            </p>
+          </div>
+          <div>
+            <ReportCardSkeleton />
+            <ReportCardSkeleton />
+            <ReportCardSkeleton />
+          </div>
+        </div>
+      }
+    >
       <ReportBrowser />
     </Suspense>
   )
