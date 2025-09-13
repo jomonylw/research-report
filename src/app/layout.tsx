@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
+import Script from 'next/script'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -31,6 +32,13 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Jomonylw', url: process.env.NEXT_PUBLIC_APP_URL! }],
   manifest: '/manifest.json',
+  icons: {
+    icon: '/icon.svg',
+    apple: '/apple-icon.png',
+  },
+  verification: {
+    google: '7HFogv_3jnp93WlOKjh26rw86o8jp4SWJoOzzbrDnAY',
+  },
 }
 
 export default function RootLayout({
@@ -43,6 +51,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-w-[480px]`}
       >
+        <Script
+          async
+          src='https://www.googletagmanager.com/gtag/js?id=G-Y6ENG2X8Y2'
+        />
+        <Script id='google-analytics'>
+          {`
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Y6ENG2X8Y2');
+`}
+        </Script>
         <ThemeProvider
           attribute='class'
           defaultTheme='system'
