@@ -1,0 +1,8 @@
+# Ignore artifacts:
+build
+dist
+.next
+node_modules
+
+# Ignore lockfiles:
+pnpm-lock.yaml
