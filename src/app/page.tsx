@@ -1,103 +1,110 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useEffect, useState, Suspense } from 'react';
+import { Button } from '@/components/ui/button';
+import { Report, Pagination } from '@/lib/types';
+import { ReportFilters } from '@/components/ReportFilters';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ReportCard } from '@/components/ReportCard';
+import { ReportCardSkeleton } from '@/components/ReportCardSkeleton';
+import { Pagination as PaginationControl } from '@/components/Pagination';
+import Header from '@/components/Header';
+
+function ReportBrowser() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [reports, setReports] = useState<Report[]>([]);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const query = searchParams.toString();
+        const response = await fetch(`/api/reports?${query}`);
+        if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`);
+        const data = await response.json();
+        setReports(data.data);
+        setPagination(data.pagination);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReports();
+  }, [searchParams]);
+
+  const handleFilterChange = (query: string) => {
+     // This function is now primarily to re-trigger fetches when filters change.
+     // The ReportFilters component handles the URL updates.
+  };
+
+  const handleTagClick = (filterType: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(filterType, value);
+    params.set('page', '1');
+    router.push(`?${params.toString()}`);
+  };
+
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', page.toString());
+    router.push(`?${params.toString()}`);
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main className="container mx-auto p-4 max-w-6xl">
+      <Header />
+      
+      <ReportFilters onFilterChange={handleFilterChange} />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      <div className="my-4 pl-2 text-sm text-muted-foreground">
+        {loading ? (
+          <p className="flex items-center">
+            共找到&nbsp;
+            <span className="inline-block bg-gray-200 dark:bg-gray-700 rounded-sm animate-pulse h-5 w-8"></span>
+            &nbsp;份研报
+          </p>
+        ) : (
+          pagination && pagination.totalItems > 0 ? (
+            <p>共找到 {pagination.totalItems} 份研报</p>
+          ) : null
+        )}
+      </div>
+
+      {error && <p className="text-red-500">发生错误: {error}</p>}
+
+      {loading ? (
+        <div>
+            <ReportCardSkeleton /><ReportCardSkeleton /><ReportCardSkeleton />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      ) : (
+        <div>
+          {reports.length > 0 && reports.map((report) => (
+            <ReportCard key={report.infoCode} report={report} onTagClick={handleTagClick} />
+          ))}
+          {!loading && reports.length === 0 && (
+            <div className="h-24 text-center flex items-center justify-center"><p>没有找到结果。</p></div>
+          )}
+        </div>
+      )}
+
+      {pagination && pagination.totalPages > 1 && (
+        <PaginationControl currentPage={pagination.currentPage} totalPages={pagination.totalPages} onPageChange={handlePageChange} />
+      )}
+    </main>
   );
+}
+
+export default function ReportBrowserPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ReportBrowser />
+        </Suspense>
+    )
 }
