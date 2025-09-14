@@ -61,8 +61,9 @@ async function fetchReportsFromDb(request: NextRequest) {
 
   const offset = (page - 1) * pageSize
 
-  const whereClauses: string[] = [`status = 'completed'`, `pdfLink IS NOT NULL`]
+  const whereClauses: string[] = [`pdfLink IS NOT NULL`]
   const params: Value[] = []
+  let useFts = false
 
   // Helper to add multi-value 'OR' conditions wrapped in parentheses
   const addOrCondition = (field: string, values: string[] | undefined) => {
@@ -87,17 +88,37 @@ async function fetchReportsFromDb(request: NextRequest) {
   addOrCondition('market', market)
 
   if (author && author.length > 0) {
-    const authorClauses = author.map(() => `author LIKE ?`).join(' OR ')
-    whereClauses.push(`(${authorClauses})`)
-    author.forEach((auth) => params.push(`%${auth}%`))
+    const authorIds = author.map((auth) => auth.split('.')[0]).filter(Boolean)
+    if (authorIds.length > 0) {
+      const placeholders = authorIds.map(() => '?').join(', ')
+      // 使用子查询高效地利用 report_author_index 表进行过滤
+      whereClauses.push(
+        `id IN (SELECT report_id FROM report_author_index WHERE author_id IN (${placeholders}))`,
+      )
+      params.push(...authorIds)
+    }
   }
 
   if (contentQuery) {
-    const keywords = contentQuery.split(' ').filter((kw) => kw.trim() !== '')
-    if (keywords.length > 0) {
-      const contentClauses = keywords.map(() => `content LIKE ?`).join(' AND ')
-      whereClauses.push(`(${contentClauses})`)
-      keywords.forEach((kw) => params.push(`%${kw}%`))
+    const allKeywords = contentQuery.split(' ').filter((kw) => kw.trim() !== '')
+    const ftsKeywords = allKeywords.filter((kw) => kw.length >= 3)
+    const likeKeywords = allKeywords.filter(
+      (kw) => kw.length > 0 && kw.length < 3,
+    )
+
+    if (ftsKeywords.length > 0) {
+      useFts = true
+      const ftsQueryString = ftsKeywords.join(' AND ')
+      whereClauses.push(`reports_fts.content MATCH ?`)
+      params.push(ftsQueryString)
+    }
+
+    if (likeKeywords.length > 0) {
+      const likeClauses = likeKeywords
+        .map(() => `reports.content LIKE ?`)
+        .join(' AND ')
+      whereClauses.push(`(${likeClauses})`)
+      likeKeywords.forEach((kw) => params.push(`%${kw}%`))
     }
   }
 
@@ -109,6 +130,10 @@ async function fetchReportsFromDb(request: NextRequest) {
   const whereSql =
     whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : ''
 
+  const fromClause = useFts
+    ? 'FROM reports JOIN reports_fts ON reports.id = reports_fts.rowid'
+    : 'FROM reports'
+
   const validSortColumns = ['publishDate', 'title', 'orgSName']
   const orderBy = validSortColumns.includes(sortBy) ? sortBy : 'publishDate'
 
@@ -118,12 +143,22 @@ async function fetchReportsFromDb(request: NextRequest) {
     orgCode, orgSName, author, "column", market, attachPages,
     attachSize, pdfLink, content
   `
-  const dataQuery = `SELECT ${selectFields} FROM reports ${whereSql} ORDER BY ${orderBy} ${order}, infoCode ${order} LIMIT ? OFFSET ?`
+  const dataQuery = `SELECT ${selectFields.replace(/content/g, 'reports.content')} ${fromClause} ${whereSql} ORDER BY ${orderBy} ${order}, infoCode ${order} LIMIT ? OFFSET ?`
   const dataParams = [...params, pageSize, offset]
+
+  // console.log('--- DEBUG SQL ---')
+  // console.log('Data Query:', dataQuery)
+  // console.log('Data Params:', dataParams)
+
   const reportsResult = await db.execute({ sql: dataQuery, args: dataParams })
   const reports = resultSetToObjects(reportsResult)
 
-  const countQuery = `SELECT COUNT(*) as count FROM reports ${whereSql}`
+  const countQuery = `SELECT COUNT(*) as count ${fromClause} ${whereSql}`
+
+  // console.log('Count Query:', countQuery)
+  // console.log('Count Params:', params)
+  // console.log('-----------------')
+
   const countResult = await db.execute({ sql: countQuery, args: params })
   const totalItems = (countResult.rows[0]?.count as number) ?? 0
 

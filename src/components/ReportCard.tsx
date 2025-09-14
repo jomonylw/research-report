@@ -72,6 +72,11 @@ export const ReportCard = ({ report, onTagClick }: ReportCardProps) => {
 
   const columnLabel = columnCodes.find((c) => c.value === report.column)?.label
 
+  const formatAuthorName = (name: string) => {
+    const parts = name.split('.')
+    return parts.length > 1 ? parts.slice(1).join('.') : name
+  }
+
   return (
     <div
       className='p-4 border rounded-lg bg-card mb-4 cursor-pointer transition-all duration-300 ease-in-out'
@@ -142,7 +147,7 @@ export const ReportCard = ({ report, onTagClick }: ReportCardProps) => {
               onClick={(e) => handleTagClick(e, 'author', report.authors[0])}
               className='text-sm bg-muted hover:bg-muted/80 px-2 py-1 rounded-md'
             >
-              {report.authorNames[0]}
+              {formatAuthorName(report.authorNames[0])}
             </button>
             <button
               onClick={(e) => {
@@ -163,7 +168,7 @@ export const ReportCard = ({ report, onTagClick }: ReportCardProps) => {
               }
               className='text-sm bg-muted hover:bg-muted/80 px-2 py-1 rounded-md'
             >
-              {name}
+              {formatAuthorName(name)}
             </button>
           ))
         )}

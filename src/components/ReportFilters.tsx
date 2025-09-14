@@ -387,6 +387,17 @@ export const ReportFilters = ({ onFilterChange }: ReportFiltersProps) => {
               .join(', ')
           case 'attachPages':
             return `> ${val}`
+          case 'author':
+            const authors = val.split(',')
+            if (authors.length > 2) {
+              return `已选择 ${authors.length} 位作者`
+            }
+            return authors
+              .map((author) => {
+                const parts = author.split('.')
+                return parts.length > 1 ? parts.slice(1).join('.') : author
+              })
+              .join(', ')
           default:
             return val
         }
