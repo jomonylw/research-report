@@ -75,13 +75,7 @@ async function fetchReportsFromDb(request: NextRequest) {
   }
 
   addOrCondition('reportType', reportType)
-  if (industryCode && industryCode.length > 0) {
-    const placeholders = industryCode.map(() => '?').join(', ')
-    whereClauses.push(
-      `(industryCode IN (${placeholders}) OR indvInduCode IN (${placeholders}))`,
-    )
-    params.push(...industryCode, ...industryCode)
-  }
+  addOrCondition('industryCode', industryCode)
   addOrCondition('stockCode', stockCode)
   addOrCondition('column', columnCode)
   addOrCondition('orgCode', orgCode)
