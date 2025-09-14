@@ -84,7 +84,11 @@ export const ReportCard = ({ report, onTagClick }: ReportCardProps) => {
     >
       <div className='flex justify-between items-start'>
         <h2 className='text-xl font-bold pr-4'>
-          {report.title}
+          <span
+            dangerouslySetInnerHTML={{
+              __html: highlightKeywords(report.title || '', contentQuery),
+            }}
+          />
           {report.attachPages && (
             <span className='text-sm font-normal text-muted-foreground ml-2'>
               [ {report.attachPages}页 ]

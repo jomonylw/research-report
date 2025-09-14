@@ -103,13 +103,13 @@ async function fetchReportsFromDb(request: NextRequest) {
     if (ftsKeywords.length > 0) {
       useFts = true
       const ftsQueryString = ftsKeywords.join(' AND ')
-      whereClauses.push(`reports_fts.content MATCH ?`)
+      whereClauses.push(`reports_fts.content_text MATCH ?`)
       params.push(ftsQueryString)
     }
 
     if (likeKeywords.length > 0) {
       const likeClauses = likeKeywords
-        .map(() => `reports.content LIKE ?`)
+        .map(() => `reports.content_text LIKE ?`)
         .join(' AND ')
       whereClauses.push(`(${likeClauses})`)
       likeKeywords.forEach((kw) => params.push(`%${kw}%`))
