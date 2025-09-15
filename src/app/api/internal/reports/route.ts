@@ -102,7 +102,7 @@ async function fetchReportsFromDb(request: NextRequest) {
 
     if (ftsKeywords.length > 0) {
       useFts = true
-      const ftsQueryString = ftsKeywords.join(' AND ')
+      const ftsQueryString = ftsKeywords.map((kw) => `"${kw}"`).join(' AND ')
       whereClauses.push(`reports_fts.content_text MATCH ?`)
       params.push(ftsQueryString)
     }
