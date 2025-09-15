@@ -10,7 +10,7 @@ const Header = () => {
         <div className='flex items-center gap-2'>
           <FileSearch className='h-8 w-8 text-primary' />
           <h1 className='text-2xl font-bold'>
-            <span className='bg-primary text-primary-foreground px-1 py-1 rounded-md mr-1'>
+            <span className='bg-primary text-primary-foreground px-1 py-1 rounded-md mr-1 font-bold shadow-lg'>
               研报
             </span>
             中心

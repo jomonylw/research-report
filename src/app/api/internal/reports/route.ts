@@ -146,9 +146,9 @@ async function fetchReportsFromDb(request: NextRequest) {
   const dataQuery = `SELECT ${selectFields.replace(/content/g, 'reports.content')} ${fromClause} ${whereSql} ORDER BY ${orderBy} ${order}, infoCode ${order} LIMIT ? OFFSET ?`
   const dataParams = [...params, pageSize, offset]
 
-  console.log('--- DEBUG SQL ---')
-  console.log('Data Query:', dataQuery)
-  console.log('Data Params:', dataParams)
+  // console.log('--- DEBUG SQL ---')
+  // console.log('Data Query:', dataQuery)
+  // console.log('Data Params:', dataParams)
 
   const reportsResult = await db.execute({ sql: dataQuery, args: dataParams })
   const reports = resultSetToObjects(reportsResult)
