@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, FileX } from 'lucide-react'
 import { Report, Pagination } from '@/lib/types'
 import { ReportFilters } from '@/components/ReportFilters'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -26,8 +26,12 @@ function ReportBrowser() {
       try {
         const query = searchParams.toString()
         const response = await fetch(`/api/reports?${query}`)
-        if (!response.ok)
-          throw new Error(`Failed to fetch: ${response.statusText}`)
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(
+            errorData.error || `Failed to fetch: ${response.statusText}`,
+          )
+        }
         const data = await response.json()
         setReports(data.data)
         setPagination(data.pagination)
@@ -107,8 +111,12 @@ function ReportBrowser() {
               />
             ))}
           {!loading && reports.length === 0 && (
-            <div className='h-24 text-center flex items-center justify-center'>
-              <p>没有找到结果。</p>
+            <div className='flex flex-col items-center justify-center py-16 text-center'>
+              <FileX className='h-12 w-12 text-muted-foreground' />
+              <h3 className='mt-4 text-lg font-semibold'>没有找到结果</h3>
+              <p className='mt-2 text-sm text-muted-foreground'>
+                请尝试调整或重置筛选条件以扩大搜索范围。
+              </p>
             </div>
           )}
         </div>

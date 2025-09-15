@@ -20,6 +20,16 @@ export async function GET(request: NextRequest) {
     )
 
     if (!response.ok) {
+      // If the internal API returned a client error (e.g., 400 Bad Request),
+      // parse the error message and forward it to the client.
+      if (response.status === 400) {
+        const errorData = await response.json()
+        return NextResponse.json(
+          { error: errorData.error || 'Bad Request' },
+          { status: 400 },
+        )
+      }
+      // For other server-side errors, throw an error to be caught by the catch block.
       throw new Error(
         `Failed to fetch internal reports: ${response.statusText}`,
       )

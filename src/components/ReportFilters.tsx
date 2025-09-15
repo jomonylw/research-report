@@ -442,7 +442,7 @@ export const ReportFilters = ({ onFilterChange }: ReportFiltersProps) => {
           <div className='lg:col-span-2 relative flex items-center'>
             <Input
               name='contentQuery'
-              placeholder='关键词搜索 ...'
+              placeholder='关键词搜索(多关键词使用空格分隔) ...'
               value={keyword}
               onChange={handleKeywordChange}
               onKeyDown={handleKeyDown}

@@ -94,11 +94,17 @@ async function fetchReportsFromDb(request: NextRequest) {
   }
 
   if (contentQuery) {
-    const allKeywords = contentQuery.split(' ').filter((kw) => kw.trim() !== '')
+    const allKeywords = contentQuery
+      .trim()
+      .split(/[ \u3000]+/)
+      .filter((kw) => kw)
+
+    if (allKeywords.some((kw) => kw.length < 2)) {
+      throw new Error('搜索关键词的每个词长度必须大于等于两个字符')
+    }
+
     const ftsKeywords = allKeywords.filter((kw) => kw.length >= 3)
-    const likeKeywords = allKeywords.filter(
-      (kw) => kw.length > 0 && kw.length < 3,
-    )
+    const likeKeywords = allKeywords.filter((kw) => kw.length === 2)
 
     if (ftsKeywords.length > 0) {
       useFts = true
@@ -140,9 +146,9 @@ async function fetchReportsFromDb(request: NextRequest) {
   const dataQuery = `SELECT ${selectFields.replace(/content/g, 'reports.content')} ${fromClause} ${whereSql} ORDER BY ${orderBy} ${order}, infoCode ${order} LIMIT ? OFFSET ?`
   const dataParams = [...params, pageSize, offset]
 
-  // console.log('--- DEBUG SQL ---')
-  // console.log('Data Query:', dataQuery)
-  // console.log('Data Params:', dataParams)
+  console.log('--- DEBUG SQL ---')
+  console.log('Data Query:', dataQuery)
+  console.log('Data Params:', dataParams)
 
   const reportsResult = await db.execute({ sql: dataQuery, args: dataParams })
   const reports = resultSetToObjects(reportsResult)
@@ -172,6 +178,12 @@ export async function GET(request: NextRequest) {
     const data = await fetchReportsFromDb(request)
     return NextResponse.json(data)
   } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === '搜索关键词的每个词长度必须大于等于两个字符'
+    ) {
+      return NextResponse.json({ error: error.message }, { status: 400 })
+    }
     console.error('Failed to fetch reports from database:', error)
     return NextResponse.json(
       { error: 'Internal Server Error' },
