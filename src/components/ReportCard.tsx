@@ -181,7 +181,11 @@ export const ReportCard = ({ report, onTagClick }: ReportCardProps) => {
       <div
         className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? 'max-h-0' : 'max-h-[200px] mt-3'}`}
       >
-        <p>{report.summary}</p>
+        <div
+          dangerouslySetInnerHTML={{
+            __html: highlightKeywords(report.summary || '', contentQuery),
+          }}
+        />
       </div>
 
       <div
