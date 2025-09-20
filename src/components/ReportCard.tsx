@@ -200,13 +200,16 @@ export const ReportCard = ({ report, onTagClick }: ReportCardProps) => {
       </div>
 
       <div
-        className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? 'max-h-0' : 'max-h-[200px] mt-3'}`}
+        className={`grid transition-all duration-500 ease-in-out ${isExpanded ? 'grid-rows-[0fr]' : 'grid-rows-[1fr] mt-3'}`}
       >
-        <div
-          dangerouslySetInnerHTML={{
-            __html: highlightKeywords(report.summary || '', contentQuery),
-          }}
-        />
+        <div className='overflow-hidden'>
+          <div
+            className='prose prose-sm max-w-none dark:prose-invert line-clamp-8'
+            dangerouslySetInnerHTML={{
+              __html: highlightKeywords(report.summary || '', contentQuery),
+            }}
+          />
+        </div>
       </div>
 
       <div
@@ -235,7 +238,7 @@ export const ReportCard = ({ report, onTagClick }: ReportCardProps) => {
         />
       </div>
 
-      <div className='flex justify-end mt-1'>
+      <div className='flex justify-end mt-2'>
         {report.pdfLink && (
           <Button
             asChild
