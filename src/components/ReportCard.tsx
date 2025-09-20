@@ -21,6 +21,29 @@ interface ReportCardProps {
   ) => void
 }
 
+interface TagProps {
+  onClick: (e: React.MouseEvent) => void
+  className?: string
+  children: React.ReactNode
+}
+
+const Tag = ({ onClick, className, children }: TagProps) => (
+  <button
+    onClick={onClick}
+    className={`text-sm px-2 py-1 rounded-md ${className}`}
+  >
+    {children}
+  </button>
+)
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  const year = date.getFullYear()
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+  return `${year}/${month}/${day}`
+}
+
 export const ReportCard = ({ report, onTagClick }: ReportCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [authorsExpanded, setAuthorsExpanded] = useState(false)
@@ -96,84 +119,82 @@ export const ReportCard = ({ report, onTagClick }: ReportCardProps) => {
           )}
         </h2>
         <p className='text-sm text-muted-foreground whitespace-nowrap'>
-          {report.publishDate
-            ? new Date(report.publishDate).toLocaleDateString()
-            : 'N/A'}
+          {report.publishDate ? formatDate(report.publishDate) : 'N/A'}
         </p>
       </div>
 
-      <div className='flex flex-wrap gap-x-4 gap-y-2 mt-2 items-center'>
+      <div className='flex flex-wrap gap-x-2 gap-y-2 mt-2 items-center'>
         {report.reportType && (
-          <button
+          <Tag
             onClick={(e) => handleTagClick(e, 'reportType', report.reportType)}
-            className='text-sm bg-green-100 text-green-800 hover:bg-green-200 px-2 py-1 rounded-md dark:bg-green-900 dark:text-green-300'
+            className='bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-300'
           >
             {report.reportType === '2' ? '个股研报' : '行业研报'}
-          </button>
+          </Tag>
         )}
         {report.stockCode && report.stockName && (
-          <button
+          <Tag
             onClick={(e) => handleTagClick(e, 'stockCode', report.stockCode)}
-            className='text-sm bg-blue-100 text-blue-800 hover:bg-blue-200 px-2 py-1 rounded-md dark:bg-blue-900 dark:text-blue-300'
+            className='bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
           >
             {report.stockName} ({report.stockCode})
-          </button>
+          </Tag>
         )}
         {report.column && columnLabel && (
-          <button
+          <Tag
             onClick={(e) => handleTagClick(e, 'columnCode', report.column)}
-            className='text-sm bg-purple-100 text-purple-800 hover:bg-purple-200 px-2 py-1 rounded-md dark:bg-purple-900 dark:text-purple-300'
+            className='bg-purple-100 text-purple-800 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-300'
           >
             {columnLabel}
-          </button>
+          </Tag>
         )}
         {industryDisplayCode && industryDisplayName && (
-          <button
+          <Tag
             onClick={(e) =>
               handleTagClick(e, 'industryCode', industryDisplayCode)
             }
-            className='text-sm bg-muted hover:bg-muted/80 px-2 py-1 rounded-md'
+            className='bg-muted hover:bg-muted/80'
           >
             {industryDisplayName}
-          </button>
+          </Tag>
         )}
         {report.orgCode && report.orgSName && (
-          <button
+          <Tag
             onClick={(e) => handleTagClick(e, 'orgCode', report.orgCode)}
-            className='text-sm bg-muted hover:bg-muted/80 px-2 py-1 rounded-md'
+            className='bg-muted hover:bg-muted/80'
           >
             {report.orgSName}
-          </button>
+          </Tag>
         )}
         {report.authorNames.length > 1 && !authorsExpanded ? (
           <>
-            <button
+            <Tag
               onClick={(e) => handleTagClick(e, 'author', report.authors[0])}
-              className='text-sm bg-muted hover:bg-muted/80 px-2 py-1 rounded-md'
+              className='bg-muted hover:bg-muted/80'
             >
               {formatAuthorName(report.authorNames[0])}
-            </button>
-            <button
+            </Tag>
+            <Tag
               onClick={(e) => {
                 e.stopPropagation()
                 setAuthorsExpanded(true)
               }}
-              className='text-sm bg-muted hover:bg-muted/80 px-2 py-1 rounded-md'
+              className='bg-muted hover:bg-muted/80'
             >
               ...
-            </button>
+            </Tag>
           </>
         ) : (
           report.authorNames.map((name, index) => (
-            <button
+            <Tag
               key={index}
               onClick={(e) =>
                 handleTagClick(e, 'author', report.authors[index])
               }
-              className='text-sm bg-muted hover:bg-muted/80 px-2 py-1 rounded-md'
+              className='bg-muted hover:bg-muted/80'
             >
               {formatAuthorName(name)}
-            </button>
+            </Tag>
           ))
         )}
       </div>

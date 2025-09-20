@@ -23,6 +23,7 @@ import { Check, Search, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import industryCodes from '@/lib/industry-codes.json'
 import columnCodes from '@/lib/column-codes.json'
+import { ActiveFiltersDisplay } from './ActiveFiltersDisplay'
 
 export interface FilterState {
   reportType: string
@@ -311,130 +312,6 @@ export const ReportFilters = ({ onFilterChange }: ReportFiltersProps) => {
     onFilterChange(queryString)
   }
 
-  const ActiveFiltersDisplay = () => {
-    const activeFilters: Record<string, string> = {}
-    for (const [key, value] of searchParams.entries()) {
-      if (key !== 'page' && key !== 'pageSize' && value) {
-        activeFilters[key] = value
-      }
-    }
-
-    const clearSingleFilter = (key: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-      params.delete(key)
-      router.push(`?${params.toString()}`)
-    }
-
-    const hasActiveFilters = Object.keys(activeFilters).length > 0
-
-    if (!hasActiveFilters) {
-      return null
-    }
-
-    const getFilterDisplay = (key: string, value: string) => {
-      const displayName: { [key: string]: string } = {
-        reportType: '报表类型',
-        industryCode: '行业',
-        columnCode: '栏目',
-        stockCode: '股票',
-        orgCode: '机构',
-        contentQuery: '关键词',
-        attachPages: '页数',
-        author: '作者',
-      }
-
-      const displayValue = ((key: string, val: string) => {
-        switch (key) {
-          case 'reportType':
-            if (val === '2') return '个股研报'
-            if (val === '3') return '行业研报'
-            return val
-          case 'industryCode':
-            const codes = val.split(',')
-            if (codes.length > 2) {
-              return `已选择 ${codes.length} 个`
-            }
-            return codes
-              .map(
-                (code) =>
-                  industryCodes.find((ic) => ic.value === code)?.label || code,
-              )
-              .join(', ')
-          case 'columnCode':
-            const columnCodesList = val.split(',')
-            if (columnCodesList.length > 2) {
-              return `已选择 ${columnCodesList.length} 个`
-            }
-            return columnCodesList
-              .map(
-                (code) =>
-                  columnCodes.find((cc) => cc.value === code)?.label || code,
-              )
-              .join(', ')
-          case 'stockCode':
-            return stockList.find((s) => s.value === val)?.label || val
-          case 'orgCode':
-            const institutionCodes = val.split(',')
-            if (institutionCodes.length > 2) {
-              return `已选择 ${institutionCodes.length} 个`
-            }
-            return institutionCodes
-              .map(
-                (code) =>
-                  institutionList.find((ic) => ic.value === code)?.label ||
-                  code,
-              )
-              .join(', ')
-          case 'attachPages':
-            return `> ${val}`
-          case 'author':
-            const authors = val.split(',')
-            if (authors.length > 2) {
-              return `已选择 ${authors.length} 位作者`
-            }
-            return authors
-              .map((author) => {
-                const parts = author.split('.')
-                return parts.length > 1 ? parts.slice(1).join('.') : author
-              })
-              .join(', ')
-          default:
-            return val
-        }
-      })(key, value)
-
-      return `${displayName[key] || key}: ${displayValue}`
-    }
-
-    return (
-      <div className='mb-4 p-2 border rounded-lg bg-muted min-h-[40px] flex items-center flex-wrap gap-2'>
-        {Object.entries(activeFilters).map(([key, value]) => (
-          <div
-            key={key}
-            className='bg-primary text-primary-foreground rounded-md px-3 py-1 text-sm flex items-center'
-          >
-            <span>{getFilterDisplay(key, value)}</span>
-            <button
-              onClick={() => clearSingleFilter(key)}
-              className='ml-2 text-xs'
-            >
-              ⓧ
-            </button>
-          </div>
-        ))}
-        <Button
-          variant='ghost'
-          size='sm'
-          onClick={handleClearFilters}
-          className='text-muted-foreground hover:text-destructive'
-        >
-          <Trash2 className='h-4 w-4' />
-          清除筛选
-        </Button>
-      </div>
-    )
-  }
-
   return (
     <>
       <div className='p-4 border rounded-lg bg-card mb-4'>
@@ -652,7 +529,11 @@ export const ReportFilters = ({ onFilterChange }: ReportFiltersProps) => {
           </div>
         </div>
       </div>
-      <ActiveFiltersDisplay />
+      <ActiveFiltersDisplay
+        stockList={stockList}
+        institutionList={institutionList}
+        handleClearFilters={handleClearFilters}
+      />
     </>
   )
 }
